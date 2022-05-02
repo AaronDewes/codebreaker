@@ -2,7 +2,7 @@
   "manifest_version": 3,
 
   "name": "CodeBreaker",
-  "description": "Chrome Extension, TypeScript, Visual Studio Code",
+  "description": "Enhance season 2 of breakthecode.tech",
   "version": "1.0",
 
   "options_ui": {
@@ -19,6 +19,15 @@
           "matches": ["https://breakthecode.tech/game"],
           "js": ["js/vendor.js", "js/content_script.js"]
       }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": ["js/injected.js"],
+      "matches": [
+        "https://breakthecode.tech/*"
+      ]
+    }
   ],
 
   "background": {
