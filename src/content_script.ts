@@ -9,5 +9,5 @@ window.onload = () => {
     scriptEl.src = browser.runtime.getURL("js/injected.js");
     container.appendChild(scriptEl);
     console.log("Loaded CodeBreaker mod!");
-  }, 30000);
+  }, 20000);
 };

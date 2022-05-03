@@ -135,7 +135,15 @@ export default class CheatEngine {
    * Shows an "Incoming Transmission From DotGang" screen
    */
   startBlackScreen(text: string) {
-    this.vue.$store.dispatch("updateBlackScreen", text);
+    let i = 0;
+    const typeWriter = () => {
+      if (i < text.length) {
+        this.vue.$store.dispatch("updateBlackScreen", text.substring(0, i + 1));
+        i++;
+        setTimeout(typeWriter, 50);
+      }
+    }
+    typeWriter();
   }
 
   /**
