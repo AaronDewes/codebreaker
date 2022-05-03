@@ -3,3 +3,4 @@ node_modules/
 dist/
 tmp/
 realGame.js
+store.json
