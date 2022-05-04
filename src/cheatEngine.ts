@@ -138,17 +138,12 @@ export default class CheatEngine {
 
   /**
    * Shows an "Incoming Transmission From DotGang" screen
+   * @param text The text to display
+   * @param staticScreen If true, the "Typewriter" effect is disabled
    */
-  startBlackScreen(text: string) {
-    let i = 0;
-    const typeWriter = () => {
-      if (i < text.length) {
-        this.vue.$store.dispatch("updateBlackScreen", text.substring(0, i + 1));
-        i++;
-        setTimeout(typeWriter, 50);
-      }
-    }
-    typeWriter();
+  startBlackScreen(text: string, staticScreen: boolean = false) {
+    this.vue.$store.dispatch("initBlackScreen", staticScreen ? "static" : "");
+    this.vue.$store.state.blackScreen.val = text;
   }
 
   /**
