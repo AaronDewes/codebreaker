@@ -121,7 +121,7 @@ export default class CheatEngine {
   /**
    * Make Clippy say random hints from the current game clippy list
    */
-  clippySetRandom(text: string) {
+  clippySetRandom() {
     this.vue.$store.dispatch("setClippyRandom");
   }
   /**
@@ -152,7 +152,7 @@ export default class CheatEngine {
   addDrive4ToMainUi() {
     const myComputer = this.findPath("/") as GameStore["systemWindows"][number];
     const g3Drive = myComputer.grid?.indexOf("g3-drive") || myComputer.grid?.length || 0;
-    myComputer.grid?.splice(g3Drive, 0, "g4-drive");
+    myComputer.grid?.splice(g3Drive + 1, 0, "g4-drive");
   }
 
   /**
@@ -160,5 +160,11 @@ export default class CheatEngine {
    */
   findPath(path: string) {
     return this.vue.$store.state.systemWindows.find((elem) => elem.path === path);
+  }
+
+  setApiUrl(url: string) {
+    const apiUrl = document.querySelector("input[name='app-api']") as HTMLInputElement;
+    apiUrl.dataset.url = url;
+    this.vue.$axios.defaults.baseURL = url;
   }
 }

@@ -1,5 +1,6 @@
 import type __Vue from "vue";
 import type { Store } from "vuex";
+import { Axios } from "axios";
 
 export type Game = {
   name: string
@@ -176,6 +177,7 @@ export type GameStore = {
   }
 };
 
-export type _Vue = __Vue & {
+export type _Vue = Omit<__Vue, "$store"> & {
     $store: Store<GameStore>;
+    $axios: Axios;
   };
