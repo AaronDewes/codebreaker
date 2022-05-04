@@ -1,16 +1,16 @@
-import type { _Vue } from "./types";
+import type { Vue } from "./types";
 import CheatEngine from "./cheatEngine";
 
 const app = Array.from(document.querySelectorAll("*")).find(
   // @ts-expect-error
   (e) => e.__vue__
 ) as HTMLDivElement & {
-  __vue__: _Vue;
+  __vue__: Vue;
 };
 
-const Vue = app.__vue__ as _Vue;
+const vue = app.__vue__ as Vue;
 
-const cheatEngine = new CheatEngine(Vue);
+const cheatEngine = new CheatEngine(vue);
 
 // @ts-expect-error
 window.breakTheCodeCheatEngine = cheatEngine;

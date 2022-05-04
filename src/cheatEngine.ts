@@ -1,7 +1,7 @@
-import type { _Vue, GameStore } from "./types";
+import type { Vue, GameStore } from "./types";
 
 export default class CheatEngine {
-  constructor(public vue: _Vue) { };
+  constructor(public vue: Vue) { };
 
   /**
    * Make clippy say something immediately
