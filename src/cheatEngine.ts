@@ -1,7 +1,12 @@
 import type { Vue, GameStore } from "./types";
 
 export default class CheatEngine {
-  constructor(public vue: Vue) { };
+  #originalApiUrl: string;
+
+  constructor(public vue: Vue) {
+    const apiUrl = document.querySelector("input[name='app-api']") as HTMLInputElement;
+    this.#originalApiUrl = apiUrl.dataset.url as string;
+  };
 
   /**
    * Make clippy say something immediately
@@ -166,5 +171,12 @@ export default class CheatEngine {
     const apiUrl = document.querySelector("input[name='app-api']") as HTMLInputElement;
     apiUrl.dataset.url = url;
     this.vue.$axios.defaults.baseURL = url;
+  }
+
+  /**
+   * Resets the API url to the state when the CheatEngine was initialized.
+   */
+  resetApiUrl() {
+    this.setApiUrl(this.#originalApiUrl);
   }
 }
