@@ -1,11 +1,28 @@
+import { AxiosRequestConfig, AxiosRequestTransformer, AxiosResponse } from "axios";
 import type { Vue, GameStore } from "./types";
 
 export default class CheatEngine {
-  #originalApiUrl: string;
+  #interceptors: {
+    requests: Record<string, Array<(req: AxiosRequestConfig<any>) => unknown>>;
+    response: Record<string, Array<(req: AxiosResponse<any>) => unknown>>;
+  }
 
   constructor(public vue: Vue) {
-    const apiUrl = document.querySelector("input[name='app-api']") as HTMLInputElement;
-    this.#originalApiUrl = apiUrl.dataset.url as string;
+    this.vue.$axios.interceptors.request.use((req) => {
+      console.log(`[${req.method}] ${req.url}`);
+      if(this.#interceptors.requests[req.url as string]?.length > 0) {
+        this.#interceptors.requests[req.url as string].forEach(interceptor => interceptor(req));
+      }
+    });
+    this.vue.$axios.interceptors.response.use((res) => {
+      if(this.#interceptors.response[res.request.url as string]?.length > 0) {
+        this.#interceptors.response[res.request.url as string].forEach(interceptor => interceptor(res));
+      }
+    });
+    this.#interceptors = {
+      requests: {},
+      response: {},
+    };
   };
 
   /**
@@ -162,16 +179,11 @@ export default class CheatEngine {
     return this.vue.$store.state.systemWindows.find((elem) => elem.path === path);
   }
 
-  setApiUrl(url: string) {
-    const apiUrl = document.querySelector("input[name='app-api']") as HTMLInputElement;
-    apiUrl.dataset.url = url;
-    this.vue.$axios.defaults.baseURL = url;
+  interceptReq(url: string, interceptor: (req: AxiosRequestConfig<any>) => AxiosRequestConfig<any>) {
+    this.#interceptors.requests[url].push(interceptor);
   }
 
-  /**
-   * Resets the API url to the state when the CheatEngine was initialized.
-   */
-  resetApiUrl() {
-    this.setApiUrl(this.#originalApiUrl);
+  interceptRes(url: string, interceptor: (req: AxiosResponse<any>) => AxiosResponse<any>) {
+    this.#interceptors.response[url].push(interceptor);
   }
 }
