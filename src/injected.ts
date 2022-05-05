@@ -1,5 +1,6 @@
-import type { Vue } from "./types";
+import type { UserStats, Vue } from "./types";
 import CheatEngine from "./cheatEngine";
+import { AxiosResponse } from "axios";
 
 function findVue(i: number = 0) {
   return new Promise<Vue>((resolve, reject) => {
@@ -33,4 +34,23 @@ findVue().then((vue) => {
   // Adds new content
   cheatEngine.enableFlowers();
   cheatEngine.enableBonusFolder();
+
+  // Other stuff
+  cheatEngine.interceptRes("/stats", (res: AxiosResponse<UserStats>) => {
+    res.data.achievements.push({
+      "id": "run",
+      "stat": "Modded",
+      "desc": "with CodeBreaker",
+      "type": "egg",
+      "attr_int": 1000000000,
+      "title": "CodeBreaker"
+    });
+    return res;
+  })
+
+  // Open FlowerHacker
+  cheatEngine.vue.$store.dispatch("addToWindowDock", "flowers");
+  // Close FlowerHacker again, we just need it to load some webpack functions
+  // The user probably on't notice this, the black screen should still be open at this point
+  cheatEngine.vue.$store.dispatch("removeFromWindowDock", "flowers");
 });

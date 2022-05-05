@@ -181,3 +181,19 @@ export type Vue = Omit<_Vue, "$store"> & {
     $store: Store<GameStore>;
     $axios: Axios;
   };
+
+export type UserStats = {
+  total_score: number;
+  missions_solved: number;
+  easter_eggs: number;
+  total_recruits: number;
+  achievements: Array<{
+          id: string;
+          stat: string;
+          desc: string;
+          type: "egg" | "mission" | "drive";
+          attr_int: number;
+          title: string;
+          tweet?: string;
+      }>;
+};

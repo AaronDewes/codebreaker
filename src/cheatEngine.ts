@@ -1,23 +1,29 @@
-import { AxiosRequestConfig, AxiosRequestTransformer, AxiosResponse } from "axios";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
 import type { Vue, GameStore } from "./types";
 
 export default class CheatEngine {
   #interceptors: {
-    requests: Record<string, Array<(req: AxiosRequestConfig<any>) => unknown>>;
-    response: Record<string, Array<(req: AxiosResponse<any>) => unknown>>;
+    requests: Record<string, Array<(req: AxiosRequestConfig<any>) => AxiosRequestConfig<any>>>;
+    response: Record<string, Array<(res: AxiosResponse<any>) => AxiosResponse<any>>>;
   }
 
   constructor(public vue: Vue) {
     this.vue.$axios.interceptors.request.use((req) => {
       console.log(`[${req.method}] ${req.url}`);
       if(this.#interceptors.requests[req.url as string]?.length > 0) {
-        this.#interceptors.requests[req.url as string].forEach(interceptor => interceptor(req));
+        for(const interceptor of this.#interceptors.requests[req.url as string]) {
+          req = interceptor(req);
+        }
       }
+      return req;
     });
     this.vue.$axios.interceptors.response.use((res) => {
-      if(this.#interceptors.response[res.request.url as string]?.length > 0) {
-        this.#interceptors.response[res.request.url as string].forEach(interceptor => interceptor(res));
+      if(this.#interceptors.response[res.config.url as string]?.length > 0) {
+        for(const interceptor of this.#interceptors.response[res.config.url as string]) {
+          res = interceptor(res);
+        }
       }
+      return res;
     });
     this.#interceptors = {
       requests: {},
@@ -180,10 +186,12 @@ export default class CheatEngine {
   }
 
   interceptReq(url: string, interceptor: (req: AxiosRequestConfig<any>) => AxiosRequestConfig<any>) {
+    if(!this.#interceptors.requests[url]) this.#interceptors.requests[url] = [];
     this.#interceptors.requests[url].push(interceptor);
   }
 
-  interceptRes(url: string, interceptor: (req: AxiosResponse<any>) => AxiosResponse<any>) {
+  interceptRes(url: string, interceptor: (res: AxiosResponse<any>) => AxiosResponse<any>) {
+    if(!this.#interceptors.response[url]) this.#interceptors.response[url] = [];
     this.#interceptors.response[url].push(interceptor);
   }
 }
