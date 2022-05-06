@@ -69,7 +69,6 @@ findVue().then((vue) => {
   }, 3000);
 
   cheatEngine.addCommand("clippySpeak", "Make clippy say something", (input) => {
-    console.log(input);
     cheatEngine.clippySpeak(input.join(" "));
     return "";
   });

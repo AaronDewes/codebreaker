@@ -14,7 +14,6 @@ export default class CheatEngine {
     if (window.breakTheCodeCheatEngineEnabled) throw new Error("Already set up!");
     // Init Axios interceptors
     this.vue.$axios.interceptors.request.use((req) => {
-      console.log(`[${req.method}] ${req.url}`);
       if (this.#interceptors.requests[req.url as string]?.length > 0) {
         for (const interceptor of this.#interceptors.requests[req.url as string]) {
           req = interceptor(req);
