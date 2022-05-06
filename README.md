@@ -4,6 +4,14 @@ An open source browser extension for modifying Season 2 of BreakTheCode. This in
 
 It fixes a few bugs/oversights, enables unused/hidden content, and will probably even add some new codes in the future.
 
+It currently
+
+- Exposes some game internals globally
+- Adds drive 4 to "my computer"
+- Adds 1 new runhacx cheatcode
+- Adds 1 new terminal command
+
+
 ### Components
 
 - Content script (`src/content_script.ts`): Injects CodeBreaker and FlowerHacker
