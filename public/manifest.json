@@ -14,7 +14,7 @@
 
   "web_accessible_resources": [
     {
-      "resources": ["js/injected.js", "hackedFlowers.js"],
+      "resources": ["js/injected.js", "hackedFlowers.js", "xp.css"],
       "matches": [
         "https://breakthecode.tech/*"
       ]

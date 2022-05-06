@@ -120,8 +120,16 @@ export default class CheatEngine {
     this.vue.$store.state.user.clock.time = time;
   }
 
-  setDate(date: string) {
-    this.vue.$store.state.user.clock.date = date;
+  #easterEgg() {
+    console.log("You found the XP theme hidden within CodeBreaker!");
+    const cssUrl = (document.querySelector("#break-the-code-xp-css") as HTMLInputElement).value;
+    (Array.from(document.querySelectorAll("link")).find(elem => elem.type === "text/css" && elem.href.endsWith("98.css")) as HTMLLinkElement).href = cssUrl;
+  }
+
+  setDate(day: number, month: number, year: number) {
+    if ((year === 2003 && month > 10 && day > 20) || year > 2003)
+      this.#easterEgg();
+    this.vue.$store.state.user.clock.date = `${day}-${month}-${year}`;
   }
 
   /**
