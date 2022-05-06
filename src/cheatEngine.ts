@@ -1,6 +1,8 @@
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import type { Vue, GameStore } from "./types";
 
+const originalHelp = "Available Commands:<br>\n\t\t\t\t\t&nbsp;hello<br>\n\t\t\t\t\t&nbsp;norris<br>\n\t\t\t\t\t&nbsp;timenet [address] [port]<br>\n\t\t\t\t\t&nbsp;ping [address]<br>\n\t\t\t\t\t&nbsp;reverse [text]<br>\n\t\t\t\t\t&nbsp;clippy<br>\n\t\t\t\t\t&nbsp;gh repo clone [repopath]<br>\n\t\t\t\t\t&nbsp;octoclippy<br>\n\t\t\t\t\t&nbsp;install [plugin]<br>\n\t\t\t\t\t&nbsp;clear<br>\n\t\t\t\t";
+
 export default class CheatEngine {
   #interceptors: {
     requests: Record<string, Array<(req: AxiosRequestConfig<any>) => AxiosRequestConfig<any>>>;
@@ -8,18 +10,21 @@ export default class CheatEngine {
   }
 
   constructor(public vue: Vue) {
+    // @ts-expect-error
+    if (window.breakTheCodeCheatEngineEnabled) throw new Error("Already set up!");
+    // Init Axios interceptors
     this.vue.$axios.interceptors.request.use((req) => {
       console.log(`[${req.method}] ${req.url}`);
-      if(this.#interceptors.requests[req.url as string]?.length > 0) {
-        for(const interceptor of this.#interceptors.requests[req.url as string]) {
+      if (this.#interceptors.requests[req.url as string]?.length > 0) {
+        for (const interceptor of this.#interceptors.requests[req.url as string]) {
           req = interceptor(req);
         }
       }
       return req;
     });
     this.vue.$axios.interceptors.response.use((res) => {
-      if(this.#interceptors.response[res.config.url as string]?.length > 0) {
-        for(const interceptor of this.#interceptors.response[res.config.url as string]) {
+      if (this.#interceptors.response[res.config.url as string]?.length > 0) {
+        for (const interceptor of this.#interceptors.response[res.config.url as string]) {
           res = interceptor(res);
         }
       }
@@ -29,6 +34,18 @@ export default class CheatEngine {
       requests: {},
       response: {},
     };
+
+    const observer = new MutationObserver(() => {
+      this.#terminalHook();
+    });
+
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true
+    });
+
+    // @ts-expect-error
+    window.breakTheCodeCheatEngineEnabled = true;
   };
 
   /**
@@ -165,8 +182,12 @@ export default class CheatEngine {
    * @param staticScreen If true, the "Typewriter" effect is disabled
    */
   startBlackScreen(text: string, staticScreen: boolean = false) {
-    this.vue.$store.dispatch("initBlackScreen", staticScreen ? "static" : "");
-    this.vue.$store.state.blackScreen.val = text;
+    if (staticScreen) {
+      this.vue.$store.dispatch("updateBlackScreen", text);
+    } else {
+      this.vue.$store.dispatch("initBlackScreen");
+      this.vue.$store.state.blackScreen.val = text;
+    }
   }
 
   /**
@@ -186,12 +207,86 @@ export default class CheatEngine {
   }
 
   interceptReq(url: string, interceptor: (req: AxiosRequestConfig<any>) => AxiosRequestConfig<any>) {
-    if(!this.#interceptors.requests[url]) this.#interceptors.requests[url] = [];
+    if (!this.#interceptors.requests[url]) this.#interceptors.requests[url] = [];
     this.#interceptors.requests[url].push(interceptor);
   }
 
   interceptRes(url: string, interceptor: (res: AxiosResponse<any>) => AxiosResponse<any>) {
-    if(!this.#interceptors.response[url]) this.#interceptors.response[url] = [];
+    if (!this.#interceptors.response[url]) this.#interceptors.response[url] = [];
     this.#interceptors.response[url].push(interceptor);
+  }
+
+  #terminalCommandWrapper(input: string[], commandFunc: (args: string[]) => string | void): () => unknown {
+    // @ts-expect-error
+    const stdOut: (text: string) => unknown = window.webpackAccessHelper(2998).createStdout;
+    return () => {
+      return stdOut(commandFunc(input) || "");
+    };
+  }
+
+  #injectedCommands: Record<string, {
+    callback: (args: string[]) => string | void,
+    helpText: string;
+  }> = {};
+  #terminal: Vue & {
+    commands: Record<string, () => unknown>;
+    stdin: string;
+    isModded?: boolean;
+  } | null = null;
+
+  #modifyHelp() {
+    if (!this.#terminal) throw new Error("Failed to get Terminal!");
+
+    this.#terminal.commands["help"] = this.#terminalCommandWrapper([], (stdin) => {
+      let helpAddition = `<br><br>
+Added by CodeBreaker<br>
+====================<br>`
+      for (const command in this.#injectedCommands) {
+        helpAddition += `&nbsp; ${command} ${this.#injectedCommands[command].helpText}<br>`
+      }
+
+      return originalHelp + helpAddition;
+    });
+  }
+
+  #terminalHook() {
+    // @ts-expect-error
+    this.#terminal = document.querySelector(".vue-command")?.__vue__ as Vue & {
+      commands: Record<string, () => unknown>;
+      stdin: string;
+      isModded?: boolean;
+    };
+    if (!this.#terminal || (this.#terminal.isModded)) return;
+
+    this.#terminal.isModded = true;
+
+    this.#modifyHelp();
+
+    for (const command in this.#injectedCommands) {
+      this.#terminal.commands[command] = () => {
+        return this.#terminalCommandWrapper(
+          this.#terminal?.stdin.substring(command.length + 1).split(" ") || [],
+          this.#injectedCommands[command].callback
+        )();
+      }
+    }
+  }
+
+  addCommand(name: string, helpText: string, callback: (args: string[]) => string | void) {
+    if (this.#injectedCommands[name] || ["help", "ping", "timenet"].includes(name)) throw new Error("Command already defined!");
+    this.#injectedCommands[name] = {
+      helpText,
+      callback
+    };
+    if (this.#terminal) {
+      this.#terminal.commands[name] = () => {
+        return this.#terminalCommandWrapper(
+          this.#terminal?.stdin.trim().substring(name.length + 1).split(" ") || [],
+          this.#injectedCommands[name].callback
+        )();
+      }
+
+      this.#modifyHelp();
+    }
   }
 }
