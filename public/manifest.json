@@ -17,6 +17,7 @@
   "permissions": [
     "https://breakthecode.tech/game",
     "*://facebook.com/*",
+    "*://facebook.net/*",
     "*://*.facebook.com/*",
     "*://analytics.tiktok.com/*",
     "https://techdomains.piwik.pro/ppms.js",
