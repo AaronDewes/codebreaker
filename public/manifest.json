@@ -8,7 +8,7 @@
   "content_scripts": [
       {
           "matches": ["https://breakthecode.tech/game"],
-          "js": ["js/vendor.js", "js/content_script.js"]
+          "js": ["js/content_script.js"]
       }
   ],
 
