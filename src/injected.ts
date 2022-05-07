@@ -134,12 +134,30 @@ findVue().then((vue) => {
         value: "bindsomepaperstogether",
         image: "https://www.microsoft.com/en-us/microsoft-365/blog/uploads/prod/sites/2/2021/06/Msft_Nostalgia_Clippy.jpg",
       });
-      alert("Unlocked the CodeBreaker secret wallpaper.");
-      cheatEngine.vue.$store.dispatch("removeFromWindowDock", "runhacx");
-      throw new Error("Not an actual error, cheat code intercepted!");
+      req.baseURL = "https://break-the-api.vercel.app/";
+      req.url = "/unlockClippyWallpaper";
     }
     return req;
   });
+
+  cheatEngine.interceptRes("/unlockClippyWallpaper", (res) => {
+    res.data = {
+      message: window.localStorage.getItem("breakTheCodeUnlockedClippyWallpaper") === "true" ? 
+        "Code already redeemed!" :
+        "Unlocked the secret Clippy wallpaper in CodeBreaker!",
+    };
+    res.status = 200;
+    window.localStorage.setItem("breakTheCodeUnlockedClippyWallpaper", "true");
+    return res;
+  });
+
+  if(window.localStorage.getItem("breakTheCodeUnlockedClippyWallpaper") === "true") {
+    cheatEngine.vue.$store.state.settings.wallpapers.init.push({
+      name: "Clippy",
+      value: "bindsomepaperstogether",
+      image: "https://www.microsoft.com/en-us/microsoft-365/blog/uploads/prod/sites/2/2021/06/Msft_Nostalgia_Clippy.jpg",
+    });
+  }
 
   // Open FlowerHacker
   cheatEngine.vue.$store.dispatch("addToWindowDock", "flowers");
