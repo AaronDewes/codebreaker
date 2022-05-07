@@ -3,7 +3,7 @@
 
   "name": "CodeBreaker",
   "description": "Enhance season 2 of breakthecode.tech",
-  "version": "0.0.1",
+  "version": "0.0.2",
 
   "content_scripts": [
       {
