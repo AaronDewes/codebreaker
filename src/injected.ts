@@ -1,66 +1,8 @@
-import type { UserStats, Vue } from "./types";
+import type { UserStats, Vue, Wallpaper } from "./types";
 import CheatEngine from "./cheatEngine";
 import { AxiosResponse } from "axios";
 
-const initWallpapers = [{
-  "name": "Default",
-  "value": "default"
-},
-{
-  "name": "Coder Blue",
-  "value": "coder-blue",
-  "image": "https://cdn.btc2.tech/v0/images/bg/coder-blue.jpg"
-},
-{
-  "name": "Superhero Fan",
-  "value": "superhero",
-  "image": "https://cdn.btc2.tech/v0/images/bg/superhero-fan.jpg"
-},
-{
-  "name": "GitHub - Octocat",
-  "value": "octocat",
-  "image": "https://cdn.btc2.tech/partners/octocat.png"
-},
-{
-  "name": "DEV.to wallpaper",
-  "value": "sloan",
-  "image": "https://cdn.btc2.tech/partners/DEVto.png"
-},
-{
-  "name": "Digital Ocean - Sammy the Shark",
-  "value": "sammy",
-  "image": "https://cdn.btc2.tech/partners/sammy.png"
-},
-{
-  "name": "MLH wallpaper",
-  "value": "learnbuildshare",
-  "image": "https://cdn.btc2.tech/partners/MLH.png"
-},
-{
-  "name": "HackerNoon wallpaper",
-  "value": "hackedthenoon",
-  "image": "https://cdn.btc2.tech/partners/HackerNoon.png"
-},
-{
-  "name": "Namecheap wallpaper",
-  "value": "i<3nc",
-  "image": "https://cdn.btc2.tech/partners/Namecheap.png"
-},
-{
-  "name": "Horza wallpaper",
-  "value": "forizonfever<3",
-  "image": "https://cdn.btc2.tech/extras/Forizon-8da3a52336a2.jpg"
-},
-{
-  "name": "Clumsy wallpaper",
-  "value": "birdman<batman",
-  "image": "https://cdn.btc2.tech/extras/Clumsy-640769e354e6.png"
-},
-{
-  "name": "Prince wallpaper",
-  "value": "thesilentkiller",
-  "image": "https://cdn.btc2.tech/extras/Prince-10e17e297014.png"
-}];
+
 function findVue(i: number = 0) {
   return new Promise<Vue>((resolve, reject) => {
     if (i > 600) reject("Failed to find root vue");
@@ -119,45 +61,6 @@ findVue().then((vue) => {
     return res;
   });
 
-  cheatEngine.interceptReq("/update/settings", (req) => {
-    window.localStorage.setItem("overwriteWallpaper", JSON.stringify(req.data.settings.wallpapers.selected));
-    if (!initWallpapers.includes(req.data.settings.wallpapers.selected)) {
-      req.data.settings.wallpapers.selected = initWallpapers[0];
-    }
-    return req;
-  });
-
-  cheatEngine.interceptReq("/runhacx", (req) => {
-    if (req.data.code.toLowerCase().trim().replace(" ", "") === "bindsomepaperstogether") {
-      cheatEngine.vue.$store.state.settings.wallpapers.init.push({
-        name: "Clippy",
-        value: "bindsomepaperstogether",
-        image: "https://www.microsoft.com/en-us/microsoft-365/blog/uploads/prod/sites/2/2021/06/Msft_Nostalgia_Clippy.jpg",
-      });
-      req.baseURL = "https://break-the-api.vercel.app/";
-      req.url = "/unlockClippyWallpaper";
-    }
-    return req;
-  });
-
-  cheatEngine.interceptRes("/unlockClippyWallpaper", (res) => {
-    res.data = {
-      message: window.localStorage.getItem("breakTheCodeUnlockedClippyWallpaper") === "true" ? 
-        "Code already redeemed!" :
-        "Unlocked the secret Clippy wallpaper in CodeBreaker!",
-    };
-    res.status = 200;
-    window.localStorage.setItem("breakTheCodeUnlockedClippyWallpaper", "true");
-    return res;
-  });
-
-  if(window.localStorage.getItem("breakTheCodeUnlockedClippyWallpaper") === "true") {
-    cheatEngine.vue.$store.state.settings.wallpapers.init.push({
-      name: "Clippy",
-      value: "bindsomepaperstogether",
-      image: "https://www.microsoft.com/en-us/microsoft-365/blog/uploads/prod/sites/2/2021/06/Msft_Nostalgia_Clippy.jpg",
-    });
-  }
 
   // Open FlowerHacker
   cheatEngine.vue.$store.dispatch("addToWindowDock", "flowers");

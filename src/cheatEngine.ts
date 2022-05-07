@@ -1,17 +1,91 @@
 import { AxiosRequestConfig, AxiosResponse } from "axios";
-import type { Vue, GameStore } from "./types";
+import type { Vue, GameStore, Wallpaper } from "./types";
 
 const originalHelp = "Available Commands:<br>\n\t\t\t\t\t&nbsp;hello<br>\n\t\t\t\t\t&nbsp;norris<br>\n\t\t\t\t\t&nbsp;timenet [address] [port]<br>\n\t\t\t\t\t&nbsp;ping [address]<br>\n\t\t\t\t\t&nbsp;reverse [text]<br>\n\t\t\t\t\t&nbsp;clippy<br>\n\t\t\t\t\t&nbsp;gh repo clone [repopath]<br>\n\t\t\t\t\t&nbsp;octoclippy<br>\n\t\t\t\t\t&nbsp;install [plugin]<br>\n\t\t\t\t\t&nbsp;clear<br>\n\t\t\t\t";
+
+
+const initWallpapers = [{
+  "name": "Default",
+  "value": "default"
+},
+{
+  "name": "Coder Blue",
+  "value": "coder-blue",
+  "image": "https://cdn.btc2.tech/v0/images/bg/coder-blue.jpg"
+},
+{
+  "name": "Superhero Fan",
+  "value": "superhero",
+  "image": "https://cdn.btc2.tech/v0/images/bg/superhero-fan.jpg"
+},
+{
+  "name": "GitHub - Octocat",
+  "value": "octocat",
+  "image": "https://cdn.btc2.tech/partners/octocat.png"
+},
+{
+  "name": "DEV.to wallpaper",
+  "value": "sloan",
+  "image": "https://cdn.btc2.tech/partners/DEVto.png"
+},
+{
+  "name": "Digital Ocean - Sammy the Shark",
+  "value": "sammy",
+  "image": "https://cdn.btc2.tech/partners/sammy.png"
+},
+{
+  "name": "MLH wallpaper",
+  "value": "learnbuildshare",
+  "image": "https://cdn.btc2.tech/partners/MLH.png"
+},
+{
+  "name": "HackerNoon wallpaper",
+  "value": "hackedthenoon",
+  "image": "https://cdn.btc2.tech/partners/HackerNoon.png"
+},
+{
+  "name": "Namecheap wallpaper",
+  "value": "i<3nc",
+  "image": "https://cdn.btc2.tech/partners/Namecheap.png"
+},
+{
+  "name": "Horza wallpaper",
+  "value": "forizonfever<3",
+  "image": "https://cdn.btc2.tech/extras/Forizon-8da3a52336a2.jpg"
+},
+{
+  "name": "Clumsy wallpaper",
+  "value": "birdman<batman",
+  "image": "https://cdn.btc2.tech/extras/Clumsy-640769e354e6.png"
+},
+{
+  "name": "Prince wallpaper",
+  "value": "thesilentkiller",
+  "image": "https://cdn.btc2.tech/extras/Prince-10e17e297014.png"
+}];
+
 
 export default class CheatEngine {
   #interceptors: {
     requests: Record<string, Array<(req: AxiosRequestConfig<any>) => AxiosRequestConfig<any>>>;
     response: Record<string, Array<(res: AxiosResponse<any>) => AxiosResponse<any>>>;
+  } = {
+      requests: {},
+      response: {},
+    };
+
+  #addedWallpapers: Wallpaper[];
+  #bonusWallpapers: Wallpaper[];
+
+  #setUpWallpapers() {
+    const localAddedWallpapers = window.localStorage.getItem("breakTheCodeBonusWallpapers");
+    this.#addedWallpapers = localAddedWallpapers ? JSON.parse(localAddedWallpapers) : [];
+
+    for(const wallpaper of this.#addedWallpapers)
+      this.vue.$store.state.settings.wallpapers.init.push(wallpaper);
   }
 
-  constructor(public vue: Vue) {
-    // @ts-expect-error
-    if (window.breakTheCodeCheatEngineEnabled) throw new Error("Already set up!");
+  #setUpAxiosHooks() {
     // Init Axios interceptors
     this.vue.$axios.interceptors.request.use((req) => {
       if (this.#interceptors.requests[req.url as string]?.length > 0) {
@@ -29,19 +103,69 @@ export default class CheatEngine {
       }
       return res;
     });
-    this.#interceptors = {
-      requests: {},
-      response: {},
-    };
+  }
 
+  #setUpWallpaperHooks() {
+    this.interceptReq("/update/settings", (req) => {
+      window.localStorage.setItem("overwriteWallpaper", JSON.stringify(req.data.settings.wallpapers.selected));
+      if (!initWallpapers.includes(req.data.settings.wallpapers.selected)) {
+        req.data.settings.wallpapers.selected = initWallpapers[0];
+      }
+      return req;
+    });
+
+    this.interceptReq("/runhacx", (req) => {
+      const foundWallpaper = this.#bonusWallpapers.find(({ value }) => value === req.data.code.toLowerCase().trim().replace(" ", ""));
+      const isInstalled = this.vue.$store.state.settings.wallpapers.init.find(({ value }) => value === req.data.code.toLowerCase().trim().replace(" ", "")) !== null;
+      if (foundWallpaper) {
+        this.vue.$store.state.settings.wallpapers.init.push(foundWallpaper);
+        req.baseURL = "https://break-the-api.vercel.app/";
+        req.url = isInstalled ? "/unlockSecretWallpaper" : "/codeRedeemed";
+        if (!isInstalled) {
+          this.#addedWallpapers.push(foundWallpaper);
+          window.localStorage.setItem("breakTheCodeBonusWallpapers", JSON.stringify(this.#addedWallpapers));
+        }
+      }
+      return req;
+    });
+
+    this.interceptRes("/unlockSecretWallpaper", (res) => {
+      res.data = {
+        message: `Unlocked a secret wallpaper in CodeBreaker!`,
+      };
+      res.status = 200;
+      return res;
+    });
+  }
+
+  constructor(public vue: Vue) {
+    // @ts-expect-error
+    if (window.breakTheCodeCheatEngineEnabled) throw new Error("Already set up!");
+
+    this.#addedWallpapers = [];
+    this.#bonusWallpapers  = [{
+      name: "Clippy",
+      value: "bindsomepaperstogether",
+      image: "https://www.microsoft.com/en-us/microsoft-365/blog/uploads/prod/sites/2/2021/06/Msft_Nostalgia_Clippy.jpg",
+    }];
+
+    // Set up terminal hook
     const observer = new MutationObserver(() => {
       this.#terminalHook();
     });
-
     observer.observe(document.body, {
       subtree: true,
       childList: true
     });
+
+    // Set up axios hooks
+    this.#setUpAxiosHooks();
+
+    // Set up modded wallpapers
+    this.#setUpWallpapers();
+
+    // Set hooks so modded wallpapers don't get saved to the server
+    this.#setUpWallpaperHooks();
 
     // @ts-expect-error
     window.breakTheCodeCheatEngineEnabled = true;
@@ -295,5 +419,20 @@ Added by CodeBreaker<br>
 
       this.#modifyHelp();
     }
+  }
+
+  /**
+   * Adds a cheat code to unlock a wallpaper
+   * 
+   * @param name The wallpaper's name
+   * @param code The code to unlock it
+   * @param url the URL where the actual wallpaper image is stored
+   */
+  addWallpaper(name: string, code: string, url: string) {
+    this.#bonusWallpapers.push({
+      name,
+      value: code,
+      image: url,
+    })
   }
 }

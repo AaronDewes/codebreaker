@@ -1,5 +1,5 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
 
   "name": "CodeBreaker",
   "description": "Enhance season 2 of breakthecode.tech",
@@ -12,16 +12,18 @@
       }
   ],
 
-  "web_accessible_resources": [
-    {
-      "resources": ["js/injected.js", "hackedFlowers.js", "xp.css"],
-      "matches": [
-        "https://breakthecode.tech/*"
-      ]
-    }
-  ],
+  "web_accessible_resources": ["js/injected.js", "hackedFlowers.js", "xp.css"],
 
-  "host_permissions": [
-    "https://breakthecode.tech/"
-  ]
+  "permissions": [
+    "https://breakthecode.tech/game",
+    "*://facebook.com/*",
+    "*://*.facebook.com/*",
+    "*://analytics.tiktok.com/*",
+    "https://techdomains.piwik.pro/ppms.js",
+    "webRequest",
+    "webRequestBlocking"
+  ],
+  "background": {
+    "scripts": ["js/background_script.js"]
+  }
 }

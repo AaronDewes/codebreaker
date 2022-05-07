@@ -6,6 +6,7 @@ const srcDir = path.join(__dirname, "..", "src");
 module.exports = {
     entry: {
       content_script: path.join(srcDir, 'content_script.ts'),
+      background_script: path.join(srcDir, 'background_script.ts'),
       injected: path.join(srcDir, 'injected.ts'),
     },
     output: {
@@ -16,7 +17,7 @@ module.exports = {
         splitChunks: {
             name: "vendor",
             chunks(chunk) {
-              return chunk.name !== 'background';
+              return chunk.name !== 'background_script';
             }
         },
     },
