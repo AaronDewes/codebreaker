@@ -119,7 +119,7 @@ export default class CheatEngine {
       const isInstalled = this.vue.$store.state.settings.wallpapers.init.find(({ value }) => value === req.data.code.toLowerCase().trim().replace(" ", "")) !== null;
       if (foundWallpaper) {
         this.vue.$store.state.settings.wallpapers.init.push(foundWallpaper);
-        req.baseURL = "https://break-the-api.vercel.app/";
+        req.baseURL = "https://codebreaker.vercel.app/";
         req.url = isInstalled ? "/unlockSecretWallpaper" : "/codeRedeemed";
         if (!isInstalled) {
           this.#addedWallpapers.push(foundWallpaper);
