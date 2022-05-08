@@ -431,7 +431,7 @@ Added by CodeBreaker<br>
   addWallpaper(name: string, code: string, url: string) {
     this.#bonusWallpapers.push({
       name,
-      value: code,
+      value: code.toLowerCase().replace(" ", "").trim(),
       image: url,
     })
   }
