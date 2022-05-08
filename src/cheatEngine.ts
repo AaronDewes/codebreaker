@@ -136,6 +136,14 @@ export default class CheatEngine {
       res.status = 200;
       return res;
     });
+
+    this.interceptRes("/codeRedeemed", (res) => {
+      res.data = {
+        message: "Code already redeemed!",
+      };
+      res.status = 200;
+      return res;
+    });
   }
 
   constructor(public vue: Vue) {
